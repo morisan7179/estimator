@@ -1,62 +1,77 @@
 // src/App.tsx
-
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import EstimateForm from './pages/EstimateForm';
 import EstimateItems from './pages/EstimateItems';
 import PreviewPage from './pages/PreviewPage';
 import BottomNav from './components/BottomNav';
+import type { EstimateFormData, LineItem } from './types';
 
-// 型定義（本来は src/types.ts に分けるのが理想）
-interface EstimateItem {
-  name: string;
-  unit: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-  notes?: string;
-}
-
-interface FormData {
-  companyName?: string;
-  companyAddress?: string;
-  phoneNumber?: string;
-  projectName?: string;
-  clientName?: string;
-  address?: string;
-  issueDate?: string;
-  expirationDate?: string;
-  notes?: string;
-  estimateItems: EstimateItem[];
-}
+const EMPTY_ITEM: LineItem = {
+  name: '',
+  unit: '',
+  quantity: 0,
+  unitPrice: 0,
+  total: 0,
+  notes: '',
+};
 
 const App: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    estimateItems: [],
+  /** ★ 初期値を “quantity / total / notes” に合わせて統一 */
+  const [formData, setFormData] = useState<EstimateFormData>({
+    /** 見積情報 */
+    title: '',
+    recipient: '',
+    address: '',
+    issueDate: '',
+    expirationDate: '',
+    notes: '',
+    /** 会社・顧客など（EstimateForm で使う）*/
+    companyName: '',
+    companyAddress: '',
+    phoneNumber: '',
+    projectName: '',
+    clientName: '',
+    /** 明細 30 行 */
+    lineItems: Array.from({ length: 30 }, () => ({ ...EMPTY_ITEM })),
   });
+
+  /** ★ lineItems だけを更新するラッパー */
+  const setLineItems = useCallback(
+    (items: LineItem[]) =>
+      setFormData((prev) => ({ ...prev, lineItems: items })),
+    []
+  );
 
   return (
     <Router>
-      {/* ① ページの上部に余白を確保（BottomNav用） */}
-      <div style={{ paddingBottom: '72px' }}>
-        <Routes>
-          <Route
-            path="/"
-            element={<EstimateForm formData={formData} setFormData={setFormData} />}
-          />
-          <Route
-            path="/estimate-items"
-            element={<EstimateItems formData={formData} setFormData={setFormData} />}
-          />
-          <Route
-            path="/preview"
-            element={<PreviewPage formData={formData} />}
-          />
-        </Routes>
-      </div>
+      <Routes>
+        {/* 見積基本情報入力 */}
+        <Route
+          path="/"
+          element={<EstimateForm formData={formData} setFormData={setFormData as any} />}
+        />
 
-      {/* ② どのページでも formData を参照可能に */}
+        {/* 明細入力画面 */}
+        <Route
+          path="/items"
+          element={
+            <EstimateItems
+              lineItems={formData.lineItems}
+              setLineItems={setLineItems}
+            />
+          }
+        />
+
+        {/* プレビュー画面 */}
+        <Route
+          path="/preview"
+          element={<PreviewPage formData={formData} />}
+        />
+      </Routes>
+
+      {/* フッターナビ */}
       <BottomNav formData={formData} />
     </Router>
   );

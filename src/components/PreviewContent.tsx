@@ -1,164 +1,129 @@
-// src/components/PreviewContent.tsx
+import React from 'react';
 import {
   Box,
   Typography,
   Divider,
+  Paper,
+  Button,
   Table,
+  TableBody,
+  TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
 } from '@mui/material';
+import type { EstimateFormData } from '../types';
+import { useNavigate } from 'react-router-dom';
 
-type EstimateItem = {
-  name: string;
-  unit: string;
-  quantity: number;
-  unitPrice: number;
-  notes?: string;
-};
+interface Props {
+  formData: EstimateFormData;
+}
 
-type PreviewProps = {
-  companyName: string;
-  companyAddress: string;
-  phoneNumber: string;
-  projectName: string;
-  clientName: string;
-  address: string;
-  issueDate: string;
-  expirationDate: string;
-  notes: string;
-  estimateItems: EstimateItem[];
-};
+const PreviewContent: React.FC<Props> = ({ formData }) => {
+  const navigate = useNavigate();
 
-const Preview = ({
-  companyName,
-  companyAddress,
-  phoneNumber,
-  projectName,
-  clientName,
-  address,
-  issueDate,
-  expirationDate,
-  notes,
-  estimateItems,
-}: PreviewProps) => {
-  // ★ 修正：quantity × unitPrice で小計を再計算
-  const subtotal = estimateItems.reduce((sum, item) => {
-    const itemTotal = Number(item.quantity) * Number(item.unitPrice);
-    return sum + (isFinite(itemTotal) ? itemTotal : 0);
-  }, 0);
-
-  const tax = Math.round(subtotal * 0.1);
-  const total = subtotal + tax;
+  const calculateTotal = () =>
+    formData.lineItems.reduce((sum, item) => sum + item.total, 0);
 
   return (
     <Box
+      p={2}
       sx={{
-        mt: 6,
-        p: 4,
-        backgroundColor: 'white',
-        color: 'black',
-        borderRadius: 2,
-        boxShadow: 3,
-        minWidth: 600,
         overflowX: 'auto',
-        whiteSpace: 'nowrap',
-        fontFamily: 'Noto Sans JP, sans-serif',
-        fontSize: '0.85rem',
+        bgcolor: 'white',
+        color: 'black',
+        minHeight: '100vh',
       }}
     >
-      <Typography variant="h6" gutterBottom align="center">
+      {/* タイトル */}
+      <Typography variant="h4" align="center" gutterBottom>
         御見積書
       </Typography>
 
-      <Box sx={{ mb: 2 }}>
-        <Typography align="right">作成日：{issueDate}</Typography>
-      </Box>
+      {/* 工事情報と会社情報を横並びに配置 */}
+<Box display="flex" justifyContent="space-between" mb={2}>
+  {/* 左：工事情報 */}
+  <Box textAlign="left">
+    <Typography>工事名：{formData.projectName}</Typography>
+    <Typography>お客様名：{formData.clientName}</Typography>
+    <Typography>住所：{formData.address}</Typography>
+  </Box>
 
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: 4,
-          mb: 2,
-        }}
-      >
-        <Box>
-          <Typography>工事名：{projectName}</Typography>
-          <Typography>お客様名：{clientName}</Typography>
-          <Typography>住所：{address}</Typography>
-        </Box>
+  {/* 右：会社情報 */}
+  <Box textAlign="right">
+    <Typography>作成日：{formData.issueDate}</Typography>
+    <Typography>会社名：{formData.companyName}</Typography>
+    <Typography>住所：{formData.companyAddress}</Typography>
+    <Typography>電話番号：{formData.phoneNumber}</Typography>
+  </Box>
+</Box>
 
-        <Box sx={{ textAlign: 'right' }}>
-          <Typography>{companyName}</Typography>
-          <Typography>{companyAddress}</Typography>
-          <Typography>{phoneNumber}</Typography>
-        </Box>
-      </Box>
 
       <Divider sx={{ my: 2 }} />
 
-      {estimateItems?.length ? (
-        <>
-          <Typography variant="h6" sx={{ mt: 2, mb: 1 }} align="center">
-            明細
-          </Typography>
+      {/* 明細テーブル */}
+      <TableContainer
+        component={Paper}
+        sx={{
+          mb: 2,
+          border: '1px solid #ccc',
+          bgcolor: 'white',
+          minWidth: 600,
+        }}
+      >
+        <Table size="small" aria-label="estimate-table" sx={{ borderCollapse: 'collapse' }}>
+          <TableHead>
+            <TableRow sx={{ bgcolor: '#f0f0f0' }}>
+              {['項目名', '単位', '数量', '単価', '金額', '備考'].map((header) => (
+                <TableCell
+                  key={header}
+                  sx={{ color: 'black', border: '1px solid #ccc' }}
+                >
+                  {header}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
 
-          <Box sx={{ width: '100%' }}>
-            <Table size="small" sx={{ minWidth: 600 }}>
-              <TableHead>
-                <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                  <TableCell sx={{ color: 'black' }}>名称・仕様</TableCell>
-                  <TableCell sx={{ color: 'black' }}>単位</TableCell>
-                  <TableCell sx={{ color: 'black' }}>数量</TableCell>
-                  <TableCell sx={{ color: 'black' }} align="center">
-                    単価
-                  </TableCell>
-                  <TableCell sx={{ color: 'black' }} align="center">
-                    金額
-                  </TableCell>
-                  <TableCell sx={{ color: 'black' }}>備考</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {estimateItems.map((item, index) =>
-                  item.name ? (
-                    <TableRow key={index}>
-                      <TableCell sx={{ color: 'black' }}>{item.name}</TableCell>
-                      <TableCell sx={{ color: 'black' }}>{item.unit}</TableCell>
-                      <TableCell sx={{ color: 'black' }}>{item.quantity}</TableCell>
-                      <TableCell align="right" sx={{ color: 'black' }}>
-                        {Number(item.unitPrice).toLocaleString()}
-                      </TableCell>
-                      <TableCell align="right" sx={{ color: 'black' }}>
-                        {isFinite(item.quantity) && isFinite(item.unitPrice)
-                          ? (item.quantity * item.unitPrice).toLocaleString()
-                          : '—'}
-                      </TableCell>
-                      <TableCell sx={{ color: 'black' }}>{item.notes || ''}</TableCell>
-                    </TableRow>
-                  ) : null
-                )}
-              </TableBody>
-            </Table>
-          </Box>
+          <TableBody>
+            {formData.lineItems.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell sx={{ color: 'black', border: '1px solid #ccc' }}>{item.name}</TableCell>
+                <TableCell sx={{ color: 'black', border: '1px solid #ccc' }}>{item.unit}</TableCell>
+                <TableCell sx={{ color: 'black', border: '1px solid #ccc' }}>{item.quantity}</TableCell>
+                <TableCell sx={{ color: 'black', border: '1px solid #ccc' }}>
+                  ¥{item.unitPrice.toLocaleString()}
+                </TableCell>
+                <TableCell sx={{ color: 'black', border: '1px solid #ccc' }}>
+                  ¥{item.total.toLocaleString()}
+                </TableCell>
+                <TableCell sx={{ color: 'black', border: '1px solid #ccc' }}>{item.notes}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-          <Box sx={{ mt: 2, textAlign: 'right', pr: 2 }}>
-            <Typography>小計：{subtotal.toLocaleString()} 円</Typography>
-            <Typography>消費税（10%）：{tax.toLocaleString()} 円</Typography>
-            <Typography variant="h6" sx={{ mt: 1 }} fontWeight="bold">
-              合計金額：{total.toLocaleString()} 円
-            </Typography>
-          </Box>
-        </>
-      ) : null}
+      {/* 合計金額 */}
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        合計金額：¥{calculateTotal().toLocaleString()}
+      </Typography>
 
-      <Typography sx={{ mt: 2 }}>見積有効期限：{expirationDate}</Typography>
-      <Typography>備考：{notes || '（なし）'}</Typography>
+      {/* その他情報 */}
+      <Typography>見積有効期限：{formData.expirationDate}</Typography>
+      <Typography>備考：{formData.notes || '（なし）'}</Typography>
+
+      {/* ボタン */}
+      <Box mt={3} display="flex" justifyContent="center" gap={2}>
+        <Button variant="contained" onClick={() => navigate('/items')}>
+          明細入力へ
+        </Button>
+        <Button variant="outlined" onClick={() => window.print()}>
+          印刷する
+        </Button>
+      </Box>
     </Box>
   );
 };
 
-export default Preview;
+export default PreviewContent;

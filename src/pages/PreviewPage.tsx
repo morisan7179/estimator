@@ -1,74 +1,58 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+} from '@mui/material';
 import PreviewContent from '../components/PreviewContent';
+import PrintPreview from '../components/PrintPreview'; // 印刷用コンポーネント
+import type { EstimateFormData } from '../types';
 
-interface EstimateItem {
-  name: string;
-  unit: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-  notes: string;
+interface PreviewPageProps {
+  formData: EstimateFormData;
 }
 
-interface FormData {
-  companyName: string;
-  companyAddress: string;
-  phoneNumber: string;
-  projectName: string;
-  clientName: string;
-  address: string;
-  issueDate: string;
-  expirationDate: string;
-  notes?: string;
-  estimateItems?: EstimateItem[];
-}
-
-const PreviewPage: React.FC<{ formData: FormData }> = ({ formData }) => {
+const PreviewPage: React.FC<PreviewPageProps> = ({ formData }) => {
   const navigate = useNavigate();
+  const [printMode, setPrintMode] = useState(false);
 
   if (!formData || Object.keys(formData).length === 0) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Typography>データがありません。</Typography>
-        <Button variant="outlined" onClick={() => navigate('/')}>
-          戻る
+      <Box p={4}>
+        <Typography>データが存在しません。</Typography>
+        <Button variant="contained" onClick={() => navigate('/')}>
+          フォームに戻る
         </Button>
       </Box>
     );
   }
 
-  return (
-    <Box
-      sx={{
-        p: 2,
-        pb: 10,
-        overflowX: 'auto',
-      }}
-    >
-      {/* プレビューコンテンツ */}
-      <PreviewContent
-  {...formData}
-  notes={formData.notes || ''}
-  estimateItems={formData.estimateItems || []}
-/>
+  const handlePrint = () => {
+    setPrintMode(true);
+    setTimeout(() => {
+      window.print();
+      setPrintMode(false);
+    }, 100);
+  };
 
-      {/* ボタン */}
-      <Box
-        mt={2}
-        display="flex"
-        gap={2}
-        justifyContent="center"
-        sx={{
-          mb: 10,
-          '@media print': { display: 'none' },
-        }}
-      >
-        <Button variant="outlined" onClick={() => navigate('/estimate-items')}>
-          明細に戻る
-        </Button>
-      </Box>
+  return (
+    <Box>
+      {printMode ? (
+        <PrintPreview formData={formData} />
+      ) : (
+        <>
+          <PreviewContent formData={formData} />
+          <Box display="flex" justifyContent="center" mt={4}>
+            <Button variant="contained" onClick={handlePrint} sx={{ mr: 2 }}>
+              印刷する
+            </Button>
+            <Button variant="outlined" onClick={() => navigate('/')}>
+              戻る
+            </Button>
+          </Box>
+        </>
+      )}
     </Box>
   );
 };

@@ -1,40 +1,17 @@
 // src/components/BottomNav.tsx
-
+import React, { useEffect, useState } from 'react';
 import {
   BottomNavigation,
   BottomNavigationAction,
   Paper,
-} from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
-import PreviewIcon from "@mui/icons-material/Visibility";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
-
-// 型定義（共通化している場合は import）
-interface EstimateItem {
-  name: string;
-  unit: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-  notes?: string;
-}
-
-interface FormData {
-  companyName?: string;
-  companyAddress?: string;
-  phoneNumber?: string;
-  projectName?: string;
-  clientName?: string;
-  address?: string;
-  issueDate?: string;
-  expirationDate?: string;
-  notes?: string;
-  estimateItems: EstimateItem[];
-}
+} from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import PreviewIcon from '@mui/icons-material/Visibility';
+import { useNavigate, useLocation } from 'react-router-dom';
+import type { EstimateFormData } from '../types';   // ← 共通型を import
 
 interface BottomNavProps {
-  formData: FormData;
+  formData: EstimateFormData;
 }
 
 const BottomNav: React.FC<BottomNavProps> = ({ formData }) => {
@@ -42,15 +19,20 @@ const BottomNav: React.FC<BottomNavProps> = ({ formData }) => {
   const location = useLocation();
   const [value, setValue] = useState(location.pathname);
 
+  /* URL 変更時に選択タブを同期 */
   useEffect(() => {
     setValue(location.pathname);
   }, [location.pathname]);
 
-  const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
+  /* ナビゲーションハンドラ */
+  const handleChange = (
+    _event: React.SyntheticEvent,
+    newValue: string
+  ) => {
     setValue(newValue);
     navigate(
-      newValue === "/preview" ? "/preview" : newValue,
-      newValue === "/preview" ? { state: formData } : undefined
+      newValue === '/preview' ? '/preview' : newValue,
+      newValue === '/preview' ? { state: formData } : undefined
     );
   };
 
@@ -58,21 +40,18 @@ const BottomNav: React.FC<BottomNavProps> = ({ formData }) => {
     <Paper
       elevation={3}
       sx={{
-        position: "fixed",
+        position: 'fixed',
         bottom: 0,
         left: 0,
-        width: "100vw",
+        width: '100vw',
         zIndex: 1300,
-        "@media print": { display: "none" },
+        '@media print': { display: 'none' },
       }}
     >
       <BottomNavigation value={value} onChange={handleChange} showLabels>
+        {/* ボタン構成は変更していません */}
         <BottomNavigationAction label="ホーム" value="/" icon={<HomeIcon />} />
-        <BottomNavigationAction
-          label="プレビュー"
-          value="/preview"
-          icon={<PreviewIcon />}
-        />
+        <BottomNavigationAction label="プレビュー" value="/preview" icon={<PreviewIcon />} />
       </BottomNavigation>
     </Paper>
   );
