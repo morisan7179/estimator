@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- iOS 用ステータスバー色 -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- テーマカラー（Android のツールバー色）-->
+    <meta name="theme-color" content="#2196f3" />
+
+    <!-- サイトアイコン -->
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- PWA マニフェスト -->
+    <!-- Vite では %PUBLIC_URL% は不要。public フォルダ直下に置けば /manifest.webmanifest で参照できる -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <title>職人向け見積アプリ</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
