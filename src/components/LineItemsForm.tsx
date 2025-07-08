@@ -1,105 +1,138 @@
 // src/components/LineItemsForm.tsx
 import React from 'react';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Unstable_Grid2'; // 新
-
+import {
+  Box,
+  Grid,
+  TextField,
+  IconButton,
+  Typography,
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import type { LineItem } from '../types';
 
-type Props = {
+interface LineItemsFormProps {
   items: LineItem[];
-  setItems: React.Dispatch<React.SetStateAction<LineItem[]>>;
+  setItems: (items: LineItem[]) => void; // ← Dispatch でなく関数
+}
+
+const EMPTY_ITEM: LineItem = {
+  name: '',
+  unit: '',
+  quantity: 0,
+  unitPrice: 0,
+  total: 0,
+  notes: '',
 };
 
-const LineItemsForm: React.FC<Props> = ({ items, setItems }) => {
+const LineItemsForm: React.FC<LineItemsFormProps> = ({ items, setItems }) => {
+  /* -------- 行データ更新 -------- */
   const handleChange = (
     index: number,
     field: keyof LineItem,
-    value: string
+    value: string,
   ) => {
-    setItems(prev =>
-      prev.map((row, i) =>
-        i === index
-          ? {
-            ...row,
-            [field]:
-              field === 'quantity' || field === 'unitPrice'
-                ? value === '' ? '' : Number(value)
-                : value,
-            total: (() => {
-              const quantity = field === 'quantity' ? Number(value) : Number(row.quantity) || 0;
-              const unitPrice = field === 'unitPrice' ? Number(value) : Number(row.unitPrice) || 0;
-              return quantity * unitPrice;
-            })(),
-          }
-          : row
-      )
-    );
+    const updated = [...items];
+
+    if (field === 'quantity' || field === 'unitPrice') {
+      const num = value === '' ? 0 : Number(value);
+      updated[index][field] = num as any;
+    } else {
+      updated[index][field] = value as any;
+    }
+
+    // 小計再計算
+    updated[index].total = updated[index].quantity * updated[index].unitPrice;
+    setItems(updated);
   };
 
+  /* -------- 行追加／削除 -------- */
+  const addRow = () => setItems([...items, { ...EMPTY_ITEM }]);
+  const removeRow = (idx: number) =>
+    setItems(items.filter((_, i) => i !== idx));
+
+  /* -------- JSX -------- */
   return (
-    <Box sx={{ mt: 4 }}>
-      <Typography variant="h6">明細入力（最大30行）</Typography>
+    <Box>
+      <Typography variant="h6" gutterBottom>
+        明細入力
+      </Typography>
 
-      <Grid item container spacing={1} sx={{ mt: 1 }}>
-        {items.map((row, idx) => (
-          <React.Fragment key={idx}>
-             xs={3}>
-              <TextField
-                size="small"
-                label="項目名"
-                value={row.name}
-                onChange={(e) => handleChange(idx, 'name', e.target.value)}
-                fullWidth
-              />
-            </Grid>
+      {items.map((row, idx) => (
+        <Grid
+          container
+          spacing={1}
+          key={idx}
+          sx={{ mb: 1 }}
+        >
+          <Grid item xs={3}>
+            <TextField
+              label="項目名"
+              value={row.name}
+              fullWidth
+              onChange={(e) => handleChange(idx, 'name', e.target.value)}
+            />
+          </Grid>
 
-            <Grid item  xs={2}>
-              <TextField
-                size="small"
-                label="単位"
-                value={row.unit}
-                onChange={(e) => handleChange(idx, 'unit', e.target.value)}
-                fullWidth
-              />
-            </Grid>
+          <Grid item xs={1}>
+            <TextField
+              label="単位"
+              value={row.unit}
+              fullWidth
+              onChange={(e) => handleChange(idx, 'unit', e.target.value)}
+            />
+          </Grid>
 
-            <Grid item  xs={2}>
-              <TextField
-                size="small"
-                type="number"
-                label="数量"
-                value={row.quantity}
-                onChange={(e) => handleChange(idx, 'quantity', e.target.value)}
-                fullWidth
-              />
-            </Grid>
+          <Grid item xs={1}>
+            <TextField
+              label="数量"
+              type="number"
+              value={row.quantity}
+              fullWidth
+              onChange={(e) => handleChange(idx, 'quantity', e.target.value)}
+            />
+          </Grid>
 
-            <Grid item  xs={2}>
-              <TextField
-                size="small"
-                type="number"
-                label="単価"
-                value={row.unitPrice}
-                onChange={(e) => handleChange(idx, 'unitPrice', e.target.value)}
-                fullWidth
-              />
-            </Grid>
+          <Grid item xs={2}>
+            <TextField
+              label="単価"
+              type="number"
+              value={row.unitPrice}
+              fullWidth
+              onChange={(e) => handleChange(idx, 'unitPrice', e.target.value)}
+            />
+          </Grid>
 
-            <Grid item  xs={3}>
-              <TextField
-                size="small"
-                label="金額"
-                value={row.total.toLocaleString()}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-            </Grid>
-          </React.Fragment>
-        ))}
-    </Grid>
-    </Box >
+          <Grid item xs={2}>
+            <TextField
+              label="金額"
+              type="number"
+              value={row.total}
+              fullWidth
+              InputProps={{ readOnly: true }}
+            />
+          </Grid>
+
+          <Grid item xs={2}>
+            <TextField
+              label="備考"
+              value={row.notes}
+              fullWidth
+              onChange={(e) => handleChange(idx, 'notes', e.target.value)}
+            />
+          </Grid>
+
+          <Grid item xs={1}>
+            <IconButton onClick={() => removeRow(idx)}>
+              <DeleteIcon />
+            </IconButton>
+          </Grid>
+        </Grid>
+      ))}
+
+      <Box mt={2}>
+        <button onClick={addRow}>＋ 項目を追加</button>
+      </Box>
+    </Box>
   );
 };
 
