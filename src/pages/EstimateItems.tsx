@@ -4,8 +4,9 @@ import {
   Grid,
   TextField,
   IconButton,
-  Typography,
+  Typography
 } from '@mui/material';
+
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { LineItem } from '../types';
 
@@ -56,7 +57,7 @@ const EstimateItems: React.FC<EstimateItemsProps> = ({
       </Typography>
 
       {lineItems.map((item, idx) => (
-        <Grid container spacing={1} key={idx} sx={{ mb: 1 }}>
+        <Grid item container spacing={1} key={idx} sx={{ mb: 1 }}>
           <Grid item xs={3}>
             <TextField
               label="項目名"

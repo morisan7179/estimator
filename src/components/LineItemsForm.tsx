@@ -3,7 +3,7 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Unstable_Grid2'; // 新
 
 import type { LineItem } from '../types';
 
@@ -22,17 +22,17 @@ const LineItemsForm: React.FC<Props> = ({ items, setItems }) => {
       prev.map((row, i) =>
         i === index
           ? {
-              ...row,
-              [field]:
-                field === 'qty' || field === 'unitPrice'
-                  ? value === '' ? '' : Number(value)
-                  : value,
-              amount: (() => {
-                const qty = field === 'qty' ? Number(value) : Number(row.qty) || 0;
-                const unitPrice = field === 'unitPrice' ? Number(value) : Number(row.unitPrice) || 0;
-                return qty * unitPrice;
-              })(),
-            }
+            ...row,
+            [field]:
+              field === 'quantity' || field === 'unitPrice'
+                ? value === '' ? '' : Number(value)
+                : value,
+            total: (() => {
+              const quantity = field === 'quantity' ? Number(value) : Number(row.quantity) || 0;
+              const unitPrice = field === 'unitPrice' ? Number(value) : Number(row.unitPrice) || 0;
+              return quantity * unitPrice;
+            })(),
+          }
           : row
       )
     );
@@ -42,10 +42,10 @@ const LineItemsForm: React.FC<Props> = ({ items, setItems }) => {
     <Box sx={{ mt: 4 }}>
       <Typography variant="h6">明細入力（最大30行）</Typography>
 
-      <Grid container spacing={1} sx={{ mt: 1 }}>
+      <Grid item container spacing={1} sx={{ mt: 1 }}>
         {items.map((row, idx) => (
           <React.Fragment key={idx}>
-            <Grid item xs={3}>
+             xs={3}>
               <TextField
                 size="small"
                 label="項目名"
@@ -55,7 +55,7 @@ const LineItemsForm: React.FC<Props> = ({ items, setItems }) => {
               />
             </Grid>
 
-            <Grid item xs={2}>
+            <Grid item  xs={2}>
               <TextField
                 size="small"
                 label="単位"
@@ -65,18 +65,18 @@ const LineItemsForm: React.FC<Props> = ({ items, setItems }) => {
               />
             </Grid>
 
-            <Grid item xs={2}>
+            <Grid item  xs={2}>
               <TextField
                 size="small"
                 type="number"
                 label="数量"
-                value={row.qty}
-                onChange={(e) => handleChange(idx, 'qty', e.target.value)}
+                value={row.quantity}
+                onChange={(e) => handleChange(idx, 'quantity', e.target.value)}
                 fullWidth
               />
             </Grid>
 
-            <Grid item xs={2}>
+            <Grid item  xs={2}>
               <TextField
                 size="small"
                 type="number"
@@ -87,19 +87,19 @@ const LineItemsForm: React.FC<Props> = ({ items, setItems }) => {
               />
             </Grid>
 
-            <Grid item xs={3}>
+            <Grid item  xs={3}>
               <TextField
                 size="small"
                 label="金額"
-                value={row.amount.toLocaleString()}
+                value={row.total.toLocaleString()}
                 InputProps={{ readOnly: true }}
                 fullWidth
               />
             </Grid>
           </React.Fragment>
         ))}
-      </Grid>
-    </Box>
+    </Grid>
+    </Box >
   );
 };
 

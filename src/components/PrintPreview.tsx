@@ -12,7 +12,7 @@ interface EstimateItem {
   notes?: string;
 }
 
-interface PrintPreviewProps {
+interface FormData {
   companyName: string;
   companyAddress: string;
   phoneNumber: string;
@@ -25,21 +25,27 @@ interface PrintPreviewProps {
   estimateItems?: EstimateItem[];
 }
 
-const PrintPreview: React.FC<PrintPreviewProps> = ({
-  companyName,
-  companyAddress,
-  phoneNumber,
-  projectName,
-  clientName,
-  address,
-  issueDate,
-  expirationDate,
-  notes,
-  estimateItems = [],
-}) => {
+interface PrintPreviewProps {
+  data: FormData;
+}
+
+const PrintPreview: React.FC<PrintPreviewProps> = ({ data }) => {
+  const {
+    companyName,
+    companyAddress,
+    phoneNumber,
+    projectName,
+    clientName,
+    address,
+    issueDate,
+    expirationDate,
+    notes,
+    estimateItems = [],
+  } = data;
+
   const subtotal = estimateItems.reduce((sum, item) => sum + item.total, 0);
   const tax = Math.round(subtotal * 0.1);
-  const totalAmount = subtotal + tax;
+  const totaltotal = subtotal + tax;
 
   return (
     <Box
@@ -104,7 +110,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({
       <Box mt={3}>
         <Typography>小計：{subtotal.toLocaleString()} 円</Typography>
         <Typography>消費税（10%）：{tax.toLocaleString()} 円</Typography>
-        <Typography variant="h6">合計金額：{totalAmount.toLocaleString()} 円</Typography>
+        <Typography variant="h6">合計金額：{totaltotal.toLocaleString()} 円</Typography>
       </Box>
 
       <Box mt={2}>

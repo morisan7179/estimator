@@ -6,6 +6,7 @@ export interface LineItem {
   unitPrice: number;
   total: number;
   notes?: string;
+ 
 }
 
 export interface EstimateFormData {
