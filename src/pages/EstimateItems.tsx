@@ -1,17 +1,17 @@
 import React from 'react';
 import {
   Box,
-  Grid,
   TextField,
   IconButton,
-  Typography
+  Typography,
+  Grid,
 } from '@mui/material';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { LineItem } from '../types';
 
 interface EstimateItemsProps {
-  lineItems: LineItem[] | undefined;               // ← undefined を許容
+  lineItems: LineItem[];
   setLineItems: React.Dispatch<React.SetStateAction<LineItem[]>>;
 }
 
@@ -25,7 +25,7 @@ const EMPTY_ITEM: LineItem = {
 };
 
 const EstimateItems: React.FC<EstimateItemsProps> = ({
-  lineItems = [],                                  // ← デフォルトで空配列
+  lineItems = [],
   setLineItems,
 }) => {
   /* ---------- 行データ更新 ---------- */
@@ -34,13 +34,17 @@ const EstimateItems: React.FC<EstimateItemsProps> = ({
     field: keyof LineItem,
     value: string
   ) => {
-    const updated = [...lineItems];
-    if (field === 'quantity' || field === 'unitPrice') {
-      updated[index][field] = value === '' ? 0 : parseFloat(value);
+    const updated = [...lineItems] as LineItem[];
+    const key = field as keyof LineItem;
+
+    if (key === 'quantity' || key === 'unitPrice') {
+      updated[index][key] = value === '' ? 0 : parseFloat(value);
     } else {
-      updated[index][field] = value as any;
+      (updated as any)[index][key] = value;  // 型安全厳密化が不要なら any で OK
     }
-    updated[index].total = updated[index].quantity * updated[index].unitPrice;
+
+    updated[index].total =
+      updated[index].quantity * updated[index].unitPrice;
     setLineItems(updated);
   };
 
@@ -57,41 +61,53 @@ const EstimateItems: React.FC<EstimateItemsProps> = ({
       </Typography>
 
       {lineItems.map((item, idx) => (
-        <Grid item container spacing={1} key={idx} sx={{ mb: 1 }}>
-          <Grid item xs={3}>
-            <TextField
-              label="項目名"
-              value={item.name}
-              onChange={(e) => handleChange(idx, 'name', e.target.value)}
-              fullWidth
-            />
-          </Grid>
+  <Grid container spacing={1} key={idx} sx={{ mb: 1 }}>
+    <Grid item xs={3}>
+      <TextField
+        label="項目名"
+        value={item.name}
+        onChange={(e) =>
+          handleChange(idx, 'name', (e.target as HTMLInputElement).value) // ★ 型アサーションで警告回避
+        }
+        fullWidth
+      />
+    </Grid>
+
           <Grid item xs={1}>
             <TextField
               label="単位"
               value={item.unit}
-              onChange={(e) => handleChange(idx, 'unit', e.target.value)}
+              onChange={(e) =>
+                handleChange(idx, 'unit', (e.target as HTMLInputElement).value) // ★
+              }
               fullWidth
             />
           </Grid>
+
           <Grid item xs={1}>
             <TextField
               label="数量"
               type="number"
               value={item.quantity}
-              onChange={(e) => handleChange(idx, 'quantity', e.target.value)}
+              onChange={(e) =>
+                handleChange(idx, 'quantity', (e.target as HTMLInputElement).value) // ★
+              }
               fullWidth
             />
           </Grid>
+
           <Grid item xs={2}>
             <TextField
               label="単価"
               type="number"
               value={item.unitPrice}
-              onChange={(e) => handleChange(idx, 'unitPrice', e.target.value)}
+              onChange={(e) =>
+                handleChange(idx, 'unitPrice', (e.target as HTMLInputElement).value) // ★
+              }
               fullWidth
             />
           </Grid>
+
           <Grid item xs={2}>
             <TextField
               label="金額"
@@ -101,14 +117,18 @@ const EstimateItems: React.FC<EstimateItemsProps> = ({
               fullWidth
             />
           </Grid>
+
           <Grid item xs={2}>
             <TextField
               label="備考"
               value={item.notes ?? ''}
-              onChange={(e) => handleChange(idx, 'notes', e.target.value)}
+              onChange={(e) =>
+                handleChange(idx, 'notes', (e.target as HTMLInputElement).value) // ★
+              }
               fullWidth
             />
           </Grid>
+
           <Grid item xs={1}>
             <IconButton onClick={() => handleRemoveItem(idx)}>
               <DeleteIcon />

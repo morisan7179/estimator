@@ -1,4 +1,3 @@
-// src/components/LineItemsForm.tsx
 import React from 'react';
 import {
   Box,
@@ -12,7 +11,7 @@ import type { LineItem } from '../types';
 
 interface LineItemsFormProps {
   items: LineItem[];
-  setItems: (items: LineItem[]) => void; // ← Dispatch でなく関数
+  setItems: (items: LineItem[]) => void;
 }
 
 const EMPTY_ITEM: LineItem = {
@@ -29,15 +28,26 @@ const LineItemsForm: React.FC<LineItemsFormProps> = ({ items, setItems }) => {
   const handleChange = (
     index: number,
     field: keyof LineItem,
-    value: string,
+    value: string
   ) => {
     const updated = [...items];
 
-    if (field === 'quantity' || field === 'unitPrice') {
-      const num = value === '' ? 0 : Number(value);
-      updated[index][field] = num as any;
-    } else {
-      updated[index][field] = value as any;
+    switch (field) {
+      case 'quantity':
+      case 'unitPrice':
+        updated[index][field] = value === '' ? 0 : Number(value);
+        break;
+      case 'name':
+      case 'unit':
+      case 'notes':
+        updated[index][field] = value;
+        break;
+      case 'total':
+        // 読み取り専用フィールド（編集させない）
+        return;
+      default:
+        const _exhaustiveCheck: never = field;
+        return _exhaustiveCheck;
     }
 
     // 小計再計算
@@ -58,12 +68,7 @@ const LineItemsForm: React.FC<LineItemsFormProps> = ({ items, setItems }) => {
       </Typography>
 
       {items.map((row, idx) => (
-        <Grid
-          container
-          spacing={1}
-          key={idx}
-          sx={{ mb: 1 }}
-        >
+        <Grid container spacing={1} key={idx} sx={{ mb: 1 }}>
           <Grid item xs={3}>
             <TextField
               label="項目名"

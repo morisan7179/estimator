@@ -10,14 +10,16 @@ export interface LineItem {
 }
 
 export interface EstimateFormData {
+ title?: string; // ← 追加
+  recipient: string;
+  address: string;
+  issueDate: string;
+  expirationDate: string;
+  notes?: string;
   companyName: string;
   companyAddress: string;
   phoneNumber: string;
   projectName: string;
   clientName: string;
-  address: string;
-  issueDate: string;
-  expirationDate: string;
-  notes?: string;
   lineItems: LineItem[]; // ← プロパティ名も lineItems で統一
 }

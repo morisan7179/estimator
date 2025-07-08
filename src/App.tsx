@@ -37,10 +37,16 @@ const App: React.FC = () => {
     lineItems: Array.from({ length: 30 }, () => ({ ...EMPTY_ITEM })),
   });
 
-  /** ★ lineItems だけを更新するラッパー */
-  const setLineItems = useCallback(
-    (items: LineItem[]) =>
-      setFormData((prev) => ({ ...prev, lineItems: items })),
+ const setLineItems: React.Dispatch<React.SetStateAction<LineItem[]>> = useCallback(
+    (updater) => {
+      setFormData((prev) => ({
+        ...prev,
+        lineItems:
+          typeof updater === 'function'
+            ? (updater as (prev: LineItem[]) => LineItem[])(prev.lineItems)
+            : updater,
+      }));
+    },
     []
   );
 
