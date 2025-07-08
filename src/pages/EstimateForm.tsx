@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 type EstimateFormProps = {
   formData: Record<string, any>;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  lineItems: LineItem[];               // ★追加★
 };
 
 const STORAGE_KEY = 'estimateFormData';
@@ -133,32 +134,33 @@ const EstimateForm: React.FC<EstimateFormProps> = ({ formData, setFormData }) =>
       />
 
       {/* ---------- アクションボタン ---------- */}
-      {companyName && (
-        <Box sx={{ mt: 2, mb: 10, display: 'flex', gap: 1 }}>
-          {/* 明細入力ページへ遷移 */}
-          <Button
-            variant="outlined"
-            fullWidth
-            onClick={() => navigate('/items', { state: currentForm })}
-          >
-            明細入力
-          </Button>
+     {companyName && (
+  <Box sx={{ mt: 2, mb: 10, display: 'flex', gap: 1 }}>
+    {/* 明細入力 */}
+    <Button
+      variant="outlined"
+      fullWidth
+      onClick={() => navigate('/items', { state: currentForm })}
+    >
+      明細入力
+    </Button>
 
-          {/* プレビューへ遷移 */}
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => navigate('/preview', { state: currentForm })}
-          >
-            プレビューへ
-          </Button>
+    {/* プレビューへ：lineItems が 1 件以上あるときだけ有効 */}
+    <Button
+      variant="contained"
+      fullWidth
+      disabled={lineItems.length === 0}            // ★ここ★
+      onClick={() => navigate('/preview', { state: currentForm })}
+    >
+      プレビューへ
+    </Button>
 
-          {/* クリア */}
-          <Button variant="outlined" color="secondary" fullWidth onClick={handleClear}>
-            クリア
-          </Button>
-        </Box>
-      )}
+    {/* クリア */}
+    <Button variant="outlined" color="secondary" fullWidth onClick={handleClear}>
+      クリア
+    </Button>
+  </Box>
+)}
 
       {/* フッタ余白 */}
       <Box sx={{ height: 80 }} />
