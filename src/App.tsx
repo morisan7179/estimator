@@ -8,14 +8,6 @@ import PreviewPage from './pages/PreviewPage';
 import BottomNav from './components/BottomNav';
 import type { EstimateFormData, LineItem } from './types';
 
-const EMPTY_ITEM: LineItem = {
-  name: '',
-  unit: '',
-  quantity: 0,
-  unitPrice: 0,
-  total: 0,
-  notes: '',
-};
 
 const App: React.FC = () => {
   /** ❶ 初期 lineItems を [] にする ―― 必ず 1 件だけにしたい場合 */

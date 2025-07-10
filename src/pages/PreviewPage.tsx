@@ -5,11 +5,10 @@ import {
   Box,
   Button,
   Typography,
-  Stack,
+ 
 } from '@mui/material';
 import PreviewContent from '../components/PreviewContent';
 import type { EstimateFormData } from '../types';
-import html2pdf from 'html2pdf.js'; // ★ PDF保存用ライブラリ
 
 interface PreviewPageProps {
   formData: EstimateFormData;
@@ -30,22 +29,7 @@ const PreviewPage: React.FC<PreviewPageProps> = ({ formData }) => {
     );
   }
 
-  // PDF保存機能（iOS / Android 両対応）
-  const handleSaveAsPdf = () => {
-    const element = document.getElementById('preview-area');
-    if (element) {
-      html2pdf()
-        .set({
-          margin: 0.5,
-          filename: '見積書.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-        })
-        .from(element)
-        .save();
-    }
-  };
+  
 
   return (
     <Box>
