@@ -1,4 +1,3 @@
-// src/components/PreviewContent.tsx
 import React from 'react';
 import {
   Box,
@@ -14,7 +13,7 @@ import {
   TableRow,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import html2pdf from 'html2pdf.js'; // ★ PDF保存ライブラリを追加
+import html2pdf from 'html2pdf.js';
 import type { EstimateFormData } from '../types';
 
 interface Props {
@@ -37,7 +36,12 @@ const PreviewContent: React.FC<Props> = ({ formData }) => {
   /** PDF保存処理 */
   const handleSaveAsPdf = () => {
     const element = document.getElementById('preview-area');
+    const buttons = document.getElementById('pdf-buttons'); // ★ 追加：ボタンを対象に
+
     if (element) {
+      // ★ ボタンを一時的に非表示
+      if (buttons) buttons.style.display = 'none';
+
       html2pdf()
         .set({
           margin: 0.5,
@@ -47,13 +51,17 @@ const PreviewContent: React.FC<Props> = ({ formData }) => {
           jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
         })
         .from(element)
-        .save();
+        .save()
+        .then(() => {
+          // ★ PDF出力後に再表示
+          if (buttons) buttons.style.display = 'flex';
+        });
     }
   };
 
   return (
     <Box
-      id="preview-area" // ★ PDF化対象
+      id="preview-area"
       p={2}
       sx={{
         overflowX: 'auto',
@@ -69,14 +77,12 @@ const PreviewContent: React.FC<Props> = ({ formData }) => {
 
       {/* ===== 工事情報 & 会社情報 ===== */}
       <Box display="flex" justifyContent="space-between" mb={2}>
-        {/* 左：工事情報 */}
         <Box textAlign="left">
           <Typography>工事名：{formData.projectName}</Typography>
           <Typography>お客様名：{formData.clientName}</Typography>
           <Typography>住所：{formData.address}</Typography>
         </Box>
 
-        {/* 右：会社情報 */}
         <Box textAlign="right">
           <Typography>作成日：{formData.issueDate}</Typography>
           <Typography>会社名：{formData.companyName}</Typography>
@@ -151,7 +157,14 @@ const PreviewContent: React.FC<Props> = ({ formData }) => {
       <Typography>備考：{formData.notes || '（なし）'}</Typography>
 
       {/* ===== ボタン群 ===== */}
-      <Box mt={3} display="flex" justifyContent="center" gap={2} flexWrap="wrap">
+      <Box
+        id="pdf-buttons" // ★ ここでIDを指定
+        mt={3}
+        display="flex"
+        justifyContent="center"
+        gap={2}
+        flexWrap="wrap"
+      >
         <Button variant="contained" onClick={() => navigate('/items')}>
           明細入力へ
         </Button>
