@@ -13,8 +13,9 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import type { EstimateFormData } from '../types';
 import { useNavigate } from 'react-router-dom';
+import html2pdf from 'html2pdf.js'; // ★ PDF保存ライブラリを追加
+import type { EstimateFormData } from '../types';
 
 interface Props {
   formData: EstimateFormData;
@@ -30,11 +31,29 @@ const PreviewContent: React.FC<Props> = ({ formData }) => {
   );
 
   /** 消費税（10%）と合計 */
-  const tax         = Math.round(subtotal * 0.1);
-  const grandTotal  = subtotal + tax;
+  const tax = Math.round(subtotal * 0.1);
+  const grandTotal = subtotal + tax;
+
+  /** PDF保存処理 */
+  const handleSaveAsPdf = () => {
+    const element = document.getElementById('preview-area');
+    if (element) {
+      html2pdf()
+        .set({
+          margin: 0.5,
+          filename: '見積書.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+        })
+        .from(element)
+        .save();
+    }
+  };
 
   return (
     <Box
+      id="preview-area" // ★ PDF化対象
       p={2}
       sx={{
         overflowX: 'auto',
@@ -82,7 +101,10 @@ const PreviewContent: React.FC<Props> = ({ formData }) => {
           <TableHead>
             <TableRow sx={{ bgcolor: '#f0f0f0' }}>
               {['項目名', '単位', '数量', '単価', '金額', '備考'].map((h) => (
-                <TableCell key={h} sx={{ border: '1px solid #ccc' }}>
+                <TableCell
+                  key={h}
+                  sx={{ border: '1px solid #ccc', color: 'black' }}
+                >
                   {h}
                 </TableCell>
               ))}
@@ -91,16 +113,24 @@ const PreviewContent: React.FC<Props> = ({ formData }) => {
           <TableBody>
             {formData.lineItems.map((item, idx) => (
               <TableRow key={idx}>
-                <TableCell sx={{ border: '1px solid #ccc' }}>{item.name}</TableCell>
-                <TableCell sx={{ border: '1px solid #ccc' }}>{item.unit}</TableCell>
-                <TableCell sx={{ border: '1px solid #ccc' }}>{item.quantity}</TableCell>
-                <TableCell sx={{ border: '1px solid #ccc' }}>
+                <TableCell sx={{ border: '1px solid #ccc', color: 'black' }}>
+                  {item.name}
+                </TableCell>
+                <TableCell sx={{ border: '1px solid #ccc', color: 'black' }}>
+                  {item.unit}
+                </TableCell>
+                <TableCell sx={{ border: '1px solid #ccc', color: 'black' }}>
+                  {item.quantity}
+                </TableCell>
+                <TableCell sx={{ border: '1px solid #ccc', color: 'black' }}>
                   ¥{item.unitPrice.toLocaleString()}
                 </TableCell>
-                <TableCell sx={{ border: '1px solid #ccc' }}>
+                <TableCell sx={{ border: '1px solid #ccc', color: 'black' }}>
                   ¥{item.total.toLocaleString()}
                 </TableCell>
-                <TableCell sx={{ border: '1px solid #ccc' }}>{item.notes}</TableCell>
+                <TableCell sx={{ border: '1px solid #ccc', color: 'black' }}>
+                  {item.notes}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -121,12 +151,12 @@ const PreviewContent: React.FC<Props> = ({ formData }) => {
       <Typography>備考：{formData.notes || '（なし）'}</Typography>
 
       {/* ===== ボタン群 ===== */}
-      <Box mt={3} display="flex" justifyContent="center" gap={2}>
+      <Box mt={3} display="flex" justifyContent="center" gap={2} flexWrap="wrap">
         <Button variant="contained" onClick={() => navigate('/items')}>
           明細入力へ
         </Button>
-        <Button variant="outlined" onClick={() => window.print()}>
-          印刷する
+        <Button variant="contained" color="success" onClick={handleSaveAsPdf}>
+          PDFで保存
         </Button>
       </Box>
     </Box>

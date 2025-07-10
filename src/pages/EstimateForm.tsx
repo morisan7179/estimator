@@ -1,32 +1,49 @@
 // src/pages/EstimateForm.tsx
 import React, { useState, useEffect } from 'react';
-import { TextField, Box, Typography, Button } from '@mui/material';
+import {
+  TextField,
+  Box,
+  Typography,
+  Button,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import type { EstimateFormData } from '../types';
 
 type EstimateFormProps = {
-  formData: Record<string, any>;
-  setFormData: React.Dispatch<React.SetStateAction<Record<string, any>>>;
-  lineItems: LineItem[];               // ★追加★
+  formData: EstimateFormData;
+  setFormData: React.Dispatch<React.SetStateAction<EstimateFormData>>;
 };
 
-const STORAGE_KEY = 'estimateFormData';
-
-const EstimateForm: React.FC<EstimateFormProps> = ({ formData, setFormData }) => {
+const EstimateForm: React.FC<EstimateFormProps> = ({
+  formData,
+  setFormData,
+}) => {
   const navigate = useNavigate();
 
-  /* ------------- 入力フィールド状態 ------------- */
-  const [companyName,    setCompanyName]    = useState(formData.companyName    ?? '');
+  const [companyName, setCompanyName] = useState(formData.companyName ?? '');
   const [companyAddress, setCompanyAddress] = useState(formData.companyAddress ?? '');
-  const [phoneNumber,    setPhoneNumber]    = useState(formData.phoneNumber    ?? '');
-  const [projectName,    setProjectName]    = useState(formData.projectName    ?? '');
-  const [clientName,     setClientName]     = useState(formData.clientName     ?? '');
-  const [address,        setAddress]        = useState(formData.address        ?? '');
-  const [issueDate,      setIssueDate]      = useState(formData.issueDate      ?? '');
+  const [phoneNumber, setPhoneNumber] = useState(formData.phoneNumber ?? '');
+  const [projectName, setProjectName] = useState(formData.projectName ?? '');
+  const [clientName, setClientName] = useState(formData.clientName ?? '');
+  const [address, setAddress] = useState(formData.address ?? '');
+  const [issueDate, setIssueDate] = useState(formData.issueDate ?? '');
   const [expirationDate, setExpirationDate] = useState(formData.expirationDate ?? '');
-  const [notes,          setNotes]          = useState(formData.notes          ?? '');
+  const [notes, setNotes] = useState(formData.notes ?? '');
 
-  /* ------------- 現在のフォームまとめ ------------- */
-  const currentForm = {
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      companyName,
+      companyAddress,
+      phoneNumber,
+      projectName,
+      clientName,
+      address,
+      issueDate,
+      expirationDate,
+      notes,
+    }));
+  }, [
     companyName,
     companyAddress,
     phoneNumber,
@@ -36,135 +53,97 @@ const EstimateForm: React.FC<EstimateFormProps> = ({ formData, setFormData }) =>
     issueDate,
     expirationDate,
     notes,
-  };
+  ]);
 
-  /* ------------- 同期ヘルパ ------------- */
-  const sync = (next: typeof currentForm) => {
-    setFormData(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  };
+const handleClear = () => {
+  setCompanyName('');
+  setCompanyAddress('');
+  setPhoneNumber('');
+  setProjectName('');
+  setClientName('');
+  setAddress('');
+  setIssueDate('');
+  setExpirationDate('');
+  setNotes('');
+  setFormData({
+    title: '',
+    recipient: '',
+    address: '',
+    issueDate: '',
+    expirationDate: '',
+    notes: '',
+    companyName: '',
+    companyAddress: '',
+    phoneNumber: '',
+    projectName: '',
+    clientName: '',
+    lineItems: [],
+  });
+};
 
-  /* ------------- onChange ハンドラ生成 ------------- */
-  const makeHandler =
-    (setter: React.Dispatch<React.SetStateAction<string>>, key: keyof typeof currentForm) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      setter(value);
-      sync({ ...currentForm, [key]: value });
-    };
 
-  /* ------------- クリア ------------- */
-  const handleClear = () => {
-    const empty = {
-      companyName: '',
-      companyAddress: '',
-      phoneNumber: '',
-      projectName: '',
-      clientName: '',
-      address: '',
-      issueDate: '',
-      expirationDate: '',
-      notes: '',
-    };
-    setCompanyName('');
-    setCompanyAddress('');
-    setPhoneNumber('');
-    setProjectName('');
-    setClientName('');
-    setAddress('');
-    setIssueDate('');
-    setExpirationDate('');
-    setNotes('');
-    sync(empty);
-  };
-
-  /* ------------- 外部から formData が変わったときの反映 ------------- */
-  useEffect(() => {
-    setCompanyName(formData.companyName ?? '');
-    setCompanyAddress(formData.companyAddress ?? '');
-    setPhoneNumber(formData.phoneNumber ?? '');
-    setProjectName(formData.projectName ?? '');
-    setClientName(formData.clientName ?? '');
-    setAddress(formData.address ?? '');
-    setIssueDate(formData.issueDate ?? '');
-    setExpirationDate(formData.expirationDate ?? '');
-    setNotes(formData.notes ?? '');
-  }, [formData]);
-
-  /* ======================== UI ======================== */
   return (
-    <Box sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
+    <Box
+      sx={{
+        p: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        height: '100vh',
+        overflowY: 'auto',
+      }}
+    >
       <Typography variant="h5" gutterBottom>
         新規見積り入力
       </Typography>
 
-      {/* ---------- 入力フィールド ---------- */}
-      <TextField label="会社名"        fullWidth margin="normal" value={companyName}    onChange={makeHandler(setCompanyName,    'companyName')} />
-      <TextField label="会社住所"      fullWidth margin="normal" value={companyAddress} onChange={makeHandler(setCompanyAddress, 'companyAddress')} />
-      <TextField label="電話番号"      fullWidth margin="normal" value={phoneNumber}    onChange={makeHandler(setPhoneNumber,    'phoneNumber')} />
-      <TextField label="工事名"        fullWidth margin="normal" value={projectName}    onChange={makeHandler(setProjectName,    'projectName')} />
-      <TextField label="お客様名"      fullWidth margin="normal" value={clientName}     onChange={makeHandler(setClientName,     'clientName')} />
-      <TextField label="住所"          fullWidth margin="normal" value={address}        onChange={makeHandler(setAddress,        'address')} />
+      <TextField fullWidth label="会社名" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+      <TextField fullWidth label="会社住所" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} />
+      <TextField fullWidth label="電話番号" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+      <TextField fullWidth label="工事名" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
+      <TextField fullWidth label="お客様名" value={clientName} onChange={(e) => setClientName(e.target.value)} />
+      <TextField fullWidth label="住所" value={address} onChange={(e) => setAddress(e.target.value)} />
+
       <TextField
-        label="作成日"
-        type="date"
         fullWidth
-        margin="normal"
+        label="見積作成日"
+        type="date"
         InputLabelProps={{ shrink: true }}
         value={issueDate}
-        onChange={makeHandler(setIssueDate, 'issueDate')}
+        onChange={(e) => setIssueDate(e.target.value)}
       />
       <TextField
+        fullWidth
         label="見積有効期限"
         type="date"
-        fullWidth
-        margin="normal"
         InputLabelProps={{ shrink: true }}
         value={expirationDate}
-        onChange={makeHandler(setExpirationDate, 'expirationDate')}
+        onChange={(e) => setExpirationDate(e.target.value)}
       />
       <TextField
-        label="備考"
         fullWidth
+        label="備考"
         multiline
         rows={3}
-        margin="normal"
         value={notes}
-        onChange={makeHandler(setNotes, 'notes')}
+        onChange={(e) => setNotes(e.target.value)}
       />
 
-      {/* ---------- アクションボタン ---------- */}
-     {companyName && (
-  <Box sx={{ mt: 2, mb: 10, display: 'flex', gap: 1 }}>
-    {/* 明細入力 */}
-    <Button
-      variant="outlined"
-      fullWidth
-      onClick={() => navigate('/items', { state: currentForm })}
-    >
-      明細入力
-    </Button>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+        <Button variant="contained" color="primary" onClick={() => navigate('/items')}>
+          明細入力へ
+        </Button>
+        <Button variant="outlined" color="secondary" onClick={handleClear}>
+          クリア
+        </Button>
+        <Button variant="outlined" onClick={() => navigate('/preview')}>
+          プレビュー
+        </Button>
+      </Box>
 
-    {/* プレビューへ：lineItems が 1 件以上あるときだけ有効 */}
-    <Button
-      variant="contained"
-      fullWidth
-      disabled={lineItems.length === 0}            // ★ここ★
-      onClick={() => navigate('/preview', { state: currentForm })}
-    >
-      プレビューへ
-    </Button>
-
-    {/* クリア */}
-    <Button variant="outlined" color="secondary" fullWidth onClick={handleClear}>
-      クリア
-    </Button>
-  </Box>
-)}
-
-      {/* フッタ余白 */}
-      <Box sx={{ height: 80 }} />
-    </Box>
+     
+      <Box sx={{ pb: 10 }} />
+  </Box> 
   );
 };
 

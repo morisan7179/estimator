@@ -18,26 +18,24 @@ const EMPTY_ITEM: LineItem = {
 };
 
 const App: React.FC = () => {
-  /** ★ 初期値を “quantity / total / notes” に合わせて統一 */
+  /** ❶ 初期 lineItems を [] にする ―― 必ず 1 件だけにしたい場合 */
   const [formData, setFormData] = useState<EstimateFormData>({
-    /** 見積情報 */
     title: '',
     recipient: '',
     address: '',
     issueDate: '',
     expirationDate: '',
     notes: '',
-    /** 会社・顧客など（EstimateForm で使う）*/
     companyName: '',
     companyAddress: '',
     phoneNumber: '',
     projectName: '',
     clientName: '',
-    /** 明細 30 行 */
-    lineItems: Array.from({ length: 30 }, () => ({ ...EMPTY_ITEM })),
+    lineItems: [], // ← ★ ここを空配列に変更
   });
 
- const setLineItems: React.Dispatch<React.SetStateAction<LineItem[]>> = useCallback(
+  /** lineItems だけを安全に更新する setter */
+  const setLineItems: React.Dispatch<React.SetStateAction<LineItem[]>> = useCallback(
     (updater) => {
       setFormData((prev) => ({
         ...prev,
@@ -53,13 +51,18 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        {/* 見積基本情報入力 */}
+        {/* 基本情報入力ページ */}
         <Route
           path="/"
-          element={<EstimateForm formData={formData} setFormData={setFormData as any} />}
+          element={
+            <EstimateForm
+              formData={formData}
+              setFormData={setFormData}
+            />
+          }
         />
 
-        {/* 明細入力画面 */}
+        {/* 明細入力ページ */}
         <Route
           path="/items"
           element={
@@ -70,14 +73,11 @@ const App: React.FC = () => {
           }
         />
 
-        {/* プレビュー画面 */}
-        <Route
-          path="/preview"
-          element={<PreviewPage formData={formData} />}
-        />
+        {/* プレビューページ */}
+        <Route path="/preview" element={<PreviewPage formData={formData} />} />
       </Routes>
 
-      {/* フッターナビ */}
+      {/* フッターナビは常時表示 */}
       <BottomNav formData={formData} />
     </Router>
   );
